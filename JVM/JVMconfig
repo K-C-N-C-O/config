@@ -1,0 +1,31 @@
+javap -v 字节码文件名称 查看具体的字节码信息。（如果jar包需要先使用 jar –xvf 命令解压）
+
+添加-XX:+TraceClassLoading 参数可以打印出加载并初始化的类
+
+通过启动类加载器去加载用户jar包：使用-Xbootclasspath/a:jar包目录/jar包名 进行扩展
+
+通过扩展类加载器去加载用户jar包：使用-Djava.ext.dirs=jar包目录 进行扩展,这种方式会覆盖掉原始目录，可以用;(windows):(macos/linux)追加上原始目录
+
+Java虚拟机栈 – 设置大小
+  要修改Java虚拟机栈的大小，可以使用虚拟机参数 -Xss 。
+  语法：-Xss栈大小
+  单位：字节（默认，必须是 1024 的倍数）、k或者K(KB)、m或者M(MB)、g或者G(GB)
+Windows（64位）下的JDK8测试最小值为180k，最大值为1024m。
+
+与-Xss类似，也可以使用 -XX:ThreadStackSize 调整标志来配置堆栈大小。格式为： -XX:ThreadStackSize=1024
+
+堆 – 设置大小
+  要修改堆的大小，可以使用虚拟机参数 –Xmx（max最大值）和-Xms (初始的total)。
+  语法：-Xmx值 -Xms值
+  单位：字节（默认，必须是 1024 的倍数）、k或者K(KB)、m或者M(MB)、g或者G(GB)
+  限制：Xmx必须大于 2 MB，Xms必须大于1MB
+Java服务端程序开发时，建议将-Xmx和-Xms设置为相同的值，这样在程序启动之后可使用的总内存就是最大内存，而无需向java虚拟机再次申请，减少了申请并分配内存时间上的开销，同时也不会出现内存过剩之后堆收缩的情况。
+
+可以使用-XX:MaxMetaspaceSize=值将元空间最大大小进行限制。
+
+直接内存(Direct Memory)
+  如果需要手动调整直接内存的大小，可以使用-XX:MaxDirectMemorySize=大小
+单位k或K表示千字节，m或M表示兆字节，g或G表示千兆字节。默认不设置该参数情况下，JVM 自动选择 最大分配的大小。
+
+
+
