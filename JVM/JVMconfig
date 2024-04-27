@@ -27,5 +27,50 @@ Java服务端程序开发时，建议将-Xmx和-Xms设置为相同的值，这�
   如果需要手动调整直接内存的大小，可以使用-XX:MaxDirectMemorySize=大小
 单位k或K表示千字节，m或M表示兆字节，g或G表示千兆字节。默认不设置该参数情况下，JVM 自动选择 最大分配的大小。
 
+如果想要查看垃圾回收的信息，可以使用-verbose:gc参数。
+
+在JDK8中，添加-XX:+UseSerialGC参数使用分代回收的垃圾回收器，运行程序。
+
+-Xmn 新生代的大小
+-XX:SurvivorRatio 伊甸园区和幸存区的比例，默认为8新生代1g内存，伊甸园区800MB,S0和S1各100MB
+-XX:+PrintGCDetails    verbose:gc    打印GC日志
+
+-XX:+UseParNewGC 新生代使用ParNew回收器， 老年代使用串行回收器
+
+XX:+UseConcMarkSweepGC 老年代- CMS(Concurrent Mark Sweep)垃圾回收器
+
+CMS使用了标记-清除算法，在垃圾收集结束之后会出现大量的内存碎片，CMS会在Full GC时进行碎片的整理。这样会导致用户线程暂停，可以使用-XX:CMSFullGCsBeforeCompaction=N 参数（默认0）调整N次Full GC之
+后再整理。
+
+CMS垃圾回收器存在的问题 – 线程资源争抢问题
+    在CMS中并发阶段运行时的线程数可以通过-XX:ConcGCThreads参数设置，默认值为0，由系统计算得出。
+    计算公式为(-XX:ParallelGCThreads定义的线程数 + 3) / 4， ParallelGCThreads是STW停顿之后的并行线程数
+
+Parallel Old是为Parallel Scavenge收集器设计的老年代版本，利用多线程并发收集。
+参数： -XX:+UseParallelGC 或
+-XX:+UseParallelOldGC可以使用
+Parallel Scavenge + Parallel Old这种组合。
+
+-XX:MaxGCPauseMillis=n  设置每次垃圾回收时的最大停顿毫秒数
+-XX:GCTimeRatio=n   设置吞吐量为n（用户线程执行时间 = n/n + 1）
+-XX:+UseAdaptiveSizePolicy  设置可以让垃圾回收器根据吞吐量和最大停顿的毫秒数自动调整内存大小
+
+G1垃圾回收器 – 内存结构
+G1的整个堆会被划分成多个大小相等的区域，称之为区Region，区域不要求是连续的。分为Eden、Survivor、
+Old区。Region的大小通过堆空间大小/2048计算得到，也可以通过参数-XX:G1HeapRegionSize=32m指定(其
+中32m指定region大小为32M)
+
+年轻代回收（Young GC），回收Eden区和Survivor区中不用的对象。会导致STW，G1中可以通过参数
+-XX:MaxGCPauseMillis=n（默认200） 设置每次垃圾回收时的最大暂停时间毫秒数，G1垃圾回收器会尽可能地
+保证暂停时间
+
+多次回收之后，会出现很多Old老年代区，此时总堆占有率达到阈值时
+（-XX:InitiatingHeapOccupancyPercent默认45%）会触发混合回收MixedGC。回收所有年轻代和
+部分老年代的对象以及大对象区。采用复制算法来完成
+
+G1 – Garbage First 垃圾回收器
+参数1： -XX:+UseG1GC 打开G1的开关，JDK9之后默认不需要打开
+参数2：-XX:MaxGCPauseMillis=毫秒值最大暂停的时间
+
 
 
